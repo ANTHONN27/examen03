@@ -1,7 +1,7 @@
 {
-  "name": "ejercicio2",
+  "name": "citas-medicas",
   "version": "1.0.0",
-  "main": "ejercicio2.js",
+  "main": "ejecicio3.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.4"
   }
 }
