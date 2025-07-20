@@ -1,25 +1,44 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const dotenv = require('dotenv')
-const citaRoutes = require('./routes/citas.routes')
+const express = require('express');
+const bodyParser = require('body-parser');
+const sql = require('mssql');
 
-dotenv.config()
-const app = express()
+const app = express();
 
-app.use(express.json())
+app.use(express.json()); 
+app.use(bodyParser.json()); 
 
-app.use('/api/citas', citaRoutes)
+const config = {
+    server: 'localhost',
+    database: 'ProductosDB',
+    driver: 'msnodesqlv8',
+    options: {
+        trustedConnection: true
+    }
+};
 
-app.get('/', (req, res) => {
-  res.send('api de citas medicas funcionando correctamente')
-})
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log('conectado a mongodb')
-    app.listen(3000, () => {
-      console.log('servidor corriendo en http://localhost:3000')
-    })
-  })
-  .catch(err => {
-    console.error('error al conectar a mongodb:', err.message)
-  })
+app.post('/producto', async (req, res) => {
+    console.log('BODY RECIBIDO:', req.body);
+
+    const { nombre, codigo } = req.body;
+
+    try {
+        await sql.connect(config);
+
+        const result = await sql.query`SELECT * FROM Productos WHERE codigo = ${codigo}`;
+
+        if (result.recordset.length > 0) {
+            return res.status(400).json({ mensaje: 'Producto con ese código ya existe' });
+        }
+
+        await sql.query`INSERT INTO Productos (nombre, codigo) VALUES (${nombre}, ${codigo})`;
+        res.status(201).json({ mensaje: 'Producto creado correctamente' });
+
+    } catch (error) {
+        console.error('Error en la conexión:', error);
+        res.status(500).json({ mensaje: 'Error del servidor' });
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Servidor corriendo en http://localhost:3000');
+});
